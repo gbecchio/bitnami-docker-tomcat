@@ -24,3 +24,5 @@ else
     exec "${start_command[@]}"
 fi
 
+service mysql start
+

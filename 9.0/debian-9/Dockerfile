@@ -7,11 +7,17 @@ ENV HOME="/" \
     OS_NAME="linux"
 
 COPY prebuildfs /
+RUN mkdir -p /bitnami/tomcat/data/examples/jsp/login
+COPY login.jsp /bitnami/tomcat/data/examples/jsp/login/
+COPY mysql-connector-java_8.0.19-1debian9_all.deb /opt/bitnami/tomcat/lib/
+
 # Install required system packages and dependencies
-RUN install_packages ca-certificates curl libc6 libssl1.1 procps sudo unzip zlib1g
+RUN install_packages ca-certificates curl libc6 libssl1.1 procps unzip zlib1g
 RUN . ./libcomponent.sh && component_unpack "java" "11.0.5-0" --checksum 9fc7502ca3c073e6ae7dd6cfa0c2da6b6c26caccbe41b6d7b5a9d26050ee54ff
-RUN . ./libcomponent.sh && component_unpack "tomcat" "9.0.30-1" --checksum 7786d0ab0d70eb6cafc2ca198bcd35ed2b8d85b6e2da35cf5ab8d6480473f403
-RUN apt-get update && apt-get upgrade && \
+RUN . ./libcomponent.sh && component_unpack "tomcat" "8.0.53-24" --checksum 1206b60d30cd2919ec0e39e3d69ae63a0efcc40765ce4a6356898962f89e5a7a
+RUN apt-get update && apt-get -y upgrade && \
+    apt-get -y install libmysql-java && \
+    apt-get -y install mysql-server && \
     rm -r /var/lib/apt/lists /var/cache/apt/archives
 RUN curl --silent -L https://github.com/tianon/gosu/releases/download/1.11/gosu-amd64 > /usr/local/bin/gosu && \
     echo 0b843df6d86e270c5b0f5cbd3c326a04e18f4b7f9b8457fa497b0454c4b138d7 /usr/local/bin/gosu | sha256sum --check && \
@@ -22,11 +28,10 @@ RUN curl --silent -L https://github.com/tianon/gosu/releases/download/1.11/gosu-
 COPY rootfs /
 RUN /postunpack.sh
 ENV BITNAMI_APP_NAME="tomcat" \
-    BITNAMI_IMAGE_VERSION="9.0.30-debian-9-r30" \
+    BITNAMI_IMAGE_VERSION="8.0.53-debian-9-r472" \
     PATH="/opt/bitnami/java/bin:/opt/bitnami/tomcat/bin:$PATH"
 
 EXPOSE 8080
 
-USER 1001
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "/run.sh" ]
